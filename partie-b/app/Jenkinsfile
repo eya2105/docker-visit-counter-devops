@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 triggers {
     githubPush()
 }
@@ -50,6 +49,5 @@ post {
         bat 'docker logout || exit /b 0'
     }
 }
-```
 
 }
