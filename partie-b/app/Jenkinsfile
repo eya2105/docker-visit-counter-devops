@@ -19,18 +19,10 @@ pipeline {
         }
 
         stage('Build & Tests unitaires') {
-            agent {
-                docker {
-                    image 'python:3.12-slim'
-                    args '-e HOME=/tmp'
-                    reuseNode true
-                }
-            }
-
             steps {
                 dir('partie-b/app') {
-                    sh 'pip install --no-cache-dir -r requirements.txt'
-                    sh 'python -m pytest -v'
+                    bat 'python -m pip install --no-cache-dir -r requirements.txt'
+                    bat 'python -m pytest -v'
                 }
             }
         }
@@ -38,7 +30,7 @@ pipeline {
         stage('Build image Docker') {
             steps {
                 dir('partie-b/app') {
-                    sh 'docker build -t $IMAGE:$BUILD_NUMBER -t $IMAGE:latest .'
+                    bat 'docker build -t %IMAGE%:%BUILD_NUMBER% -t %IMAGE%:latest .'
                 }
             }
         }
@@ -49,16 +41,16 @@ pipeline {
             }
 
             steps {
-                sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
-                sh 'docker push $IMAGE:$BUILD_NUMBER'
-                sh 'docker push $IMAGE:latest'
+                bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
+                bat 'docker push %IMAGE%:%BUILD_NUMBER%'
+                bat 'docker push %IMAGE%:latest'
             }
         }
     }
 
     post {
         always {
-            sh 'docker logout || true'
+            bat 'docker logout || exit /b 0'
         }
     }
 }
