@@ -1,54 +1,55 @@
-```groovy
 pipeline {
-    agent any
+agent any
 
-    triggers {
-        githubPush()
+```
+triggers {
+    githubPush()
+}
+
+environment {
+    IMAGE = 'samia999/counter-app'
+    DOCKERHUB = credentials('dockerhub-creds')
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            checkout scm
+        }
     }
 
-    environment {
-        IMAGE = 'samia999/counter-app'
-        DOCKERHUB = credentials('dockerhub-creds')
-    }
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build & Tests unitaires') {
-            steps {
-                dir('partie-b/app') {
-                    bat 'python -m pip install --no-cache-dir -r requirements.txt'
-                    bat 'python -m pytest -v'
-                }
-            }
-        }
-
-        stage('Build image Docker') {
-            steps {
-                dir('partie-b/app') {
-                    bat 'docker build -t %IMAGE%:%BUILD_NUMBER% -t %IMAGE%:latest .'
-                }
-            }
-        }
-
-        stage('Push Docker Hub') {
-            steps {
-                bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
-                bat 'docker push %IMAGE%:%BUILD_NUMBER%'
-                bat 'docker push %IMAGE%:latest'
+    stage('Build & Tests unitaires') {
+        steps {
+            dir('partie-b/app') {
+                bat 'python -m pip install --no-cache-dir -r requirements.txt'
+                bat 'python -m pytest -v'
             }
         }
     }
 
-    post {
-        always {
-            bat 'docker logout || exit /b 0'
+    stage('Build image Docker') {
+        steps {
+            dir('partie-b/app') {
+                bat 'docker build -t %IMAGE%:%BUILD_NUMBER% -t %IMAGE%:latest .'
+            }
+        }
+    }
+
+    stage('Push Docker Hub') {
+        steps {
+            bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
+            bat 'docker push %IMAGE%:%BUILD_NUMBER%'
+            bat 'docker push %IMAGE%:latest'
         }
     }
 }
+
+post {
+    always {
+        bat 'docker logout || exit /b 0'
+    }
+}
 ```
+
+}
