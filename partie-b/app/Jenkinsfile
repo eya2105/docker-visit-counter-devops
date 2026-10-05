@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -36,10 +37,6 @@ pipeline {
         }
 
         stage('Push Docker Hub') {
-            when {
-                branch 'main'
-            }
-
             steps {
                 bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
                 bat 'docker push %IMAGE%:%BUILD_NUMBER%'
@@ -54,3 +51,4 @@ pipeline {
         }
     }
 }
+```
